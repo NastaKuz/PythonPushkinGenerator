@@ -87,12 +87,15 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  save_weights_only=True,
                                                  verbose=1)
 
-# my_model.load_weights(checkpoint_path)
+new_model = False
+if not new_model:
+    my_model.load_weights(checkpoint_path)
+
 my_model.fit(
     x,
     y,
     batch_size=50,
-    epochs=2,
+    epochs=10,
     callbacks=[cp_callback]
 )
 
