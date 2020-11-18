@@ -1,3 +1,5 @@
+from itertools import zip_longest
+
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow import keras
@@ -25,21 +27,23 @@ def prepare_data(text_path):
     raw_text = get_raw_data_from_file(text_path)
 
     global tokenizer
-
-    corpus = raw_text.split("\n\n")
-    tokenizer.fit_on_texts(corpus)
     global max_sequence_len
     global total_words
+
+    # Превращаем текст в токены (создаем word index)
+    corpus = raw_text.split("\n\n")
+    tokenizer.fit_on_texts(corpus)
     total_words = len(tokenizer.word_index) + 1
 
+    # Разбиваем предложения на токены
     sequences = []
-
     for line in corpus:
         token_list = tokenizer.texts_to_sequences([line])[0]
         for i in range(1, len(token_list)):
             n_gram_sequence = token_list[:i + 1]
             sequences.append(n_gram_sequence)
 
+    # Делаем padding по наибольшему размеру
     sequence_lengths = list()
     for i in sequences:
         sequence_lengths.append(len(i))
@@ -51,23 +55,14 @@ def prepare_data(text_path):
     return sequences
 
 
-input_sequences = prepare_data(text_file_path)
-x, y = input_sequences[:, :-1], input_sequences[:, -1]
-y = keras.utils.to_categorical(y, num_classes=total_words)
-
-
-def make_model(dropout_rate, activation_func):
-    global total_words
-    global max_sequence_len
+def make_model(dropout_rate, activation_func, total, max_len):
     schema = [
-
-        Embedding(total_words, 10, input_length=max_sequence_len),
+        Embedding(total, 10, input_length=max_len),
         LSTM(32),
         Dropout(dropout_rate),
         Dense(32, activation=activation_func),
         Dropout(dropout_rate),
-        Dense(total_words, activation=tf.nn.softmax)
-
+        Dense(total, activation=tf.nn.softmax)
     ]
     model = keras.Sequential(schema)
     model.compile(
@@ -80,46 +75,64 @@ def make_model(dropout_rate, activation_func):
     return model
 
 
-my_model = make_model(0.3, keras.activations.relu)
-
-# Create a callback that saves the model's weights
-cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                 save_weights_only=True,
-                                                 verbose=1)
-
-new_model = False
-if not new_model:
-    my_model.load_weights(checkpoint_path)
-
-my_model.fit(
-    x,
-    y,
-    batch_size=50,
-    epochs=10,
-    callbacks=[cp_callback]
-)
+def model_parameters(*args):
+    # model, new_model, fit, ep, callback
+    # Если модель не новая, то загрузим предыдущие веса
+    if args[1]:
+        args[0].load_weights(checkpoint_path)
+    # Если хотим обучить
+    if args[2]:
+        args[0].fit(
+            x,
+            y,
+            batch_size=50,
+            epochs=args[3],
+            callbacks=[args[4]]
+        )
 
 
-def predict(seed_text, seed=10):
+def predict(seed_text, max_len, seed=10):
     global tokenizer
     for _ in range(seed):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
-        token_list = pad_sequences([token_list], maxlen=max_sequence_len, padding='pre')
+        token_list = pad_sequences([token_list], maxlen=max_len, padding='pre')
         predicted = np.argmax(my_model.predict(token_list), axis=1)
-        # predicted = model.predict_classes(token_list, verbose=0)
         output_word = ""
         for word, index in tokenizer.word_index.items():
             if index == predicted:
                 output_word = word
                 break
         seed_text += " " + output_word
-
+    print(seed_text)
+    print("\n _____ \n")
+    # seed_text = remove_repeats(seed_text)
     return seed_text
 
 
+def remove_repeats(s):
+    line = s.split()
+    k = []
+    for i in line:
+        if s.count(i) > 1 and (i not in k) or s.count(i) == 1:
+            k.append(i)
+    return ' '.join(k)
+
+
+input_sequences = prepare_data(text_file_path)
+x, y = input_sequences[:, :-1], input_sequences[:, -1]
+y = keras.utils.to_categorical(y, num_classes=total_words)
+
+my_model = make_model(0.3, keras.activations.relu, total_words, max_sequence_len)
+model_parameters(my_model, False, False)
+
+# Чтобы сохранить веса во время обучения
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                 save_weights_only=True,
+                                                 verbose=1)
+
 print(
     predict(
-        input('Введите начало текста: '),
+        input('Введите начало текста: '), max_sequence_len,
         int(input('Длина предложения: '))
     )
 )
