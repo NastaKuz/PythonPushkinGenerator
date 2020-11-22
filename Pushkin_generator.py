@@ -91,11 +91,11 @@ def model_parameters(*args):
         )
 
 
-def predict(seed_text, max_len, seed=10):
+def predict(seed_text, seed=10):
     global tokenizer
     for _ in range(seed):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
-        token_list = pad_sequences([token_list], maxlen=max_len, padding='pre')
+        token_list = pad_sequences([token_list], maxlen=max_sequence_len, padding='pre')
         predicted = np.argmax(my_model.predict(token_list), axis=1)
         output_word = ""
         for word, index in tokenizer.word_index.items():
@@ -130,9 +130,11 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  save_weights_only=True,
                                                  verbose=1)
 
-print(
-    predict(
-        input('Введите начало текста: '), max_sequence_len,
-        int(input('Длина предложения: '))
+
+def letsgo():
+    print(
+        predict(
+            input('Введите начало текста: '),
+            int(input('Длина предложения: '))
+        )
     )
-)
