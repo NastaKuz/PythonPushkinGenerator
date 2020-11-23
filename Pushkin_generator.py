@@ -91,7 +91,7 @@ def model_parameters(*args):
         )
 
 
-def predict(seed_text, seed=10):
+def predict(seed_text, seed=8):
     global tokenizer
     for _ in range(seed):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
