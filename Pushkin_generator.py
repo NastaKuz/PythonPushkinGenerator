@@ -122,13 +122,15 @@ input_sequences = prepare_data(text_file_path)
 x, y = input_sequences[:, :-1], input_sequences[:, -1]
 y = keras.utils.to_categorical(y, num_classes=total_words)
 
-my_model = make_model(0.3, keras.activations.relu, total_words, max_sequence_len)
-model_parameters(my_model, False, False)
-
 # Чтобы сохранить веса во время обучения
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  save_weights_only=True,
                                                  verbose=1)
+
+my_model = make_model(0.3, keras.activations.relu, total_words, max_sequence_len)
+model_parameters(my_model, False, True, 2, cp_callback)
+
+
 
 
 def letsgo():

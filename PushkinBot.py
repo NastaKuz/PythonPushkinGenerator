@@ -2,10 +2,13 @@ import telebot
 import config
 import Pushkin_generator
 import random
+import os
 
 from telebot import types
 
-bot = telebot.TeleBot(config.TOKEN)
+TOKEN = os.environ["TOKEN"]
+
+bot = telebot.TeleBot(TOKEN)
 sticker_path = 'Stickers/'
 pushkin_pics_path = 'Pushkin_pics/'
 
