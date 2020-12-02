@@ -128,7 +128,10 @@ cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
                                                  verbose=1)
 
 my_model = make_model(0.3, keras.activations.relu, total_words, max_sequence_len)
-model_parameters(my_model, False, True, 2, cp_callback)
+# Обучение
+# model_parameters(my_model, False, True, 2, cp_callback)
+# Просто запуск
+model_parameters(my_model, False, False)
 
 
 

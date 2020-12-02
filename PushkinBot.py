@@ -6,26 +6,20 @@ import os
 
 from telebot import types
 
-TOKEN = os.environ["TOKEN"]
+# TOKEN = os.environ["TOKEN"]
+TOKEN = config.TOKEN
 
 bot = telebot.TeleBot(TOKEN)
 sticker_path = 'Stickers/'
-pushkin_pics_path = 'Pushkin_pics/'
 
 
-def pic(text):
-    print(text)
+# Обработчик команды '/help'
+@bot.message_handler(commands=['help'])
+def help_mes(message):
+    result = "По команде /generate этот бот может сгенерировать цитату в стиле Пушкина" \
+             " с заданным началом"
 
-
-# Обработчик мини-меню
-@bot.callback_query_handler(func=lambda call: True)
-def callback_inline(call):
-    try:
-        if call.message == 'pic':
-            pic('Вот')
-
-    except Exception as e:
-        print(repr(e))
+    bot.send_message(message.chat.id, result)
 
 
 # Обработчик команды '/start'
@@ -57,11 +51,7 @@ def generate_step(message):
     seed = message.text
     bot.send_message(message.chat.id, "Подождите, ищем вдохновение...")
     result = Pushkin_generator.predict(seed)
-    markup = types.InlineKeyboardMarkup(row_width=1)
-    button = types.InlineKeyboardButton("Сделать картинкой", callback_data='pic')
-    markup.add(button)
-
-    bot.send_message(message.chat.id, result, reply_markup=markup)
+    bot.send_message(message.chat.id, result)
 
 
 # Обработчик текстовых команд
@@ -70,14 +60,13 @@ def reply(message):
     if message.chat.type == 'private':
         if message.text == "Генерировать цитату":
             generate_text(message)
-            # bot.send_message(message.chat.id, "Вот цитата:")
-        elif message.text == "Smth":
-            bot.send_message(message.chat.id, "Вот еще что-то:")
+        elif message.text == "Помощь":
+            help_mes(message)
         else:
             bot.send_message(message.chat.id, "Нипонятно(")
-    # bot.send_message(message.chat.id, message.text)
 
 
+# Развлечение
 @bot.message_handler(content_types=['sticker'])
 def sticker_reply(message):
     random_sticker = sticker_path + str(random.randint(0, 22)) + ".webp"
