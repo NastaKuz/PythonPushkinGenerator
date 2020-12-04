@@ -75,23 +75,7 @@ def make_model(dropout_rate, activation_func, total, max_len):
     return model
 
 
-def model_parameters(*args):
-    # model, new_model, fit, ep, callback
-    # Если модель не новая, то загрузим предыдущие веса
-    if args[1]:
-        args[0].load_weights(checkpoint_path)
-    # Если хотим обучить
-    if args[2]:
-        args[0].fit(
-            x,
-            y,
-            batch_size=50,
-            epochs=args[3],
-            callbacks=[args[4]]
-        )
-
-
-def predict(seed_text, seed=8):
+def predict(my_model, seed_text, seed=8):
     global tokenizer
     for _ in range(seed):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
@@ -105,41 +89,37 @@ def predict(seed_text, seed=8):
         seed_text += " " + output_word
     print(seed_text)
     print("\n _____ \n")
-    # seed_text = remove_repeats(seed_text)
     return seed_text
 
 
-def remove_repeats(s):
-    line = s.split()
-    k = []
-    for i in line:
-        if s.count(i) > 1 and (i not in k) or s.count(i) == 1:
-            k.append(i)
-    return ' '.join(k)
+# def remove_repeats(s):
+#     line = s.split()
+#     k = []
+#     for i in line:
+#         if s.count(i) > 1 and (i not in k) or s.count(i) == 1:
+#             k.append(i)
+#     return ' '.join(k)
 
 
-input_sequences = prepare_data(text_file_path)
-x, y = input_sequences[:, :-1], input_sequences[:, -1]
-y = keras.utils.to_categorical(y, num_classes=total_words)
-
-# Чтобы сохранить веса во время обучения
-cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-                                                 save_weights_only=True,
-                                                 verbose=1)
-
-my_model = make_model(0.3, keras.activations.relu, total_words, max_sequence_len)
-# Обучение
-# model_parameters(my_model, False, True, 2, cp_callback)
-# Просто запуск
-model_parameters(my_model, False, False)
-
-
-
-
-def letsgo():
-    print(
-        predict(
-            input('Введите начало текста: '),
-            int(input('Длина предложения: '))
+def letsgo(training, seed_text):
+    input_sequences = prepare_data(text_file_path)
+    x, y = input_sequences[:, :-1], input_sequences[:, -1]
+    y = keras.utils.to_categorical(y, num_classes=total_words)
+    my_model = make_model(0.3, keras.activations.relu, total_words, max_sequence_len)
+    my_model.load_weights(checkpoint_path)
+    if training:
+        # Чтобы сохранить веса во время обучения
+        cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                         save_weights_only=True,
+                                                         verbose=1)
+        my_model.fit(
+            x,
+            y,
+            batch_size=50,
+            epochs=15,
+            callbacks=cp_callback
         )
-    )
+    return predict(my_model, seed_text)
+
+
+letsgo(True, "Зима")

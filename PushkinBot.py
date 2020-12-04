@@ -11,6 +11,7 @@ TOKEN = config.TOKEN
 
 bot = telebot.TeleBot(TOKEN)
 sticker_path = 'Stickers/'
+commands = ['/start', '/help', '/generate']
 
 
 # Обработчик команды '/help'
@@ -48,10 +49,18 @@ def generate_text(message):
 
 # Генерация текста
 def generate_step(message):
-    seed = message.text
-    bot.send_message(message.chat.id, "Подождите, ищем вдохновение...")
-    result = Pushkin_generator.predict(seed)
-    bot.send_message(message.chat.id, result)
+    try:
+        seed = message.text
+        if seed in commands:
+            bot.message_handler(commands=[seed])
+
+        bot.send_message(message.chat.id, "Подождите, ищем вдохновение...")
+        result = Pushkin_generator.letsgo(False, seed)
+        msg = bot.send_message(message.chat.id, result)
+        bot.register_next_step_handler(msg, generate_step)
+    except AttributeError:
+        msg = bot.send_message(message.chat.id, "Это точно слова? Попробуй снова")
+        bot.register_next_step_handler(msg, generate_step)
 
 
 # Обработчик текстовых команд
