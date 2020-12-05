@@ -9,7 +9,7 @@ import numpy as np
 import os
 
 text_file_path = 'Pushkin.txt'
-checkpoint_path = "training_1/cp.ckpt"
+checkpoint_path = 'training_1/cp.ckpt'
 checkpoint_dir = os.path.dirname(checkpoint_path)
 total_words = 0
 max_sequence_len = 0
@@ -18,7 +18,7 @@ tokenizer = Tokenizer()
 
 def get_raw_data_from_file(path):
     text = str()
-    with open(path, "r", encoding="utf-8") as fd:
+    with open(path, 'r', encoding='utf-8') as fd:
         text += fd.read()
     return text
 
@@ -31,7 +31,7 @@ def prepare_data(text_path):
     global total_words
 
     # Превращаем текст в токены (создаем word index)
-    corpus = raw_text.split("\n\n")
+    corpus = raw_text.split('\n\n')
     tokenizer.fit_on_texts(corpus)
     total_words = len(tokenizer.word_index) + 1
 
@@ -81,14 +81,14 @@ def predict(my_model, seed_text, seed=8):
         token_list = tokenizer.texts_to_sequences([seed_text])[0]
         token_list = pad_sequences([token_list], maxlen=max_sequence_len, padding='pre')
         predicted = np.argmax(my_model.predict(token_list), axis=1)
-        output_word = ""
+        output_word = ''
         for word, index in tokenizer.word_index.items():
             if index == predicted:
                 output_word = word
                 break
-        seed_text += " " + output_word
+        seed_text += ' ' + output_word
     print(seed_text)
-    print("\n _____ \n")
+    print('\n _____ \n')
     return seed_text
 
 
@@ -116,10 +116,7 @@ def letsgo(training, seed_text):
             x,
             y,
             batch_size=50,
-            epochs=15,
+            epochs=50,
             callbacks=cp_callback
         )
     return predict(my_model, seed_text)
-
-
-letsgo(True, "Зима")
