@@ -2,6 +2,7 @@
 <br />
 <p align="center">
     <img src="https://www.flaticon.com/svg/static/icons/svg/3062/3062278.svg" alt="Pushkin" width="80" height="80">
+</p>
 
 
   <h3 align="center">Генератор цитат Пушкина</h3>
@@ -57,14 +58,20 @@
       
 
 Сама работа с ботом проста: по команде /generate он запросит у вас начало для цитаты и сгенерирует ее.
+<p align="center">
 <img src="https://i.imgur.com/WMdgX3R.png" alt="Generate" width="50%" height="50%">
 <img src="https://i.imgur.com/v3rH8CX.png" alt="Generate2" width="50%" height="50%">
+</p>
 
 Чтобы сгенерировать еще одну цитату, нажмите "Попробовать еще" или введите команду "/generate".
+<p align="center">
 <img src="https://i.imgur.com/Twvznew.png" alt="GenerateMore" width="50%" height="50%">
+</p>
 
 По команде /help выводится небольшая подсказка.
+<p align="center">
 <img src="https://i.imgur.com/V8MhYet.png" alt="GenerateMore" width="50%" height="50%">
+</p>
 
 А еще есть небольшая пасхалка, если отправить боту стикер 😉
 
