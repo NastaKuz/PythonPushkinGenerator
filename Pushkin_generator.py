@@ -116,7 +116,7 @@ def letsgo(training, seed_text):
             x,
             y,
             batch_size=50,
-            epochs=50,
+            epochs=2,
             callbacks=cp_callback
         )
     return predict(my_model, seed_text)
